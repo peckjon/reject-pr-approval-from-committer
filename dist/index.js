@@ -1448,13 +1448,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const github = __importStar(__webpack_require__(469));
+const ALLOWED_NAMES = ['dependabot[bot]', 'dependabot-preview[bot]'].reduce((acc, name) => (Object.assign(Object.assign({}, acc), { [name]: true })), {});
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const token = core.getInput("github-token", { required: true });
-            const { pull_request: pr } = github.context.payload;
+            const token = core.getInput('github-token', { required: true });
+            const { actor, payload: { pull_request: pr }, } = github.context;
             if (!pr) {
-                throw new Error("Event payload missing `pull_request`");
+                throw new Error('Event payload missing `pull_request`');
+            }
+            core.info(`PR #${pr.number} opened from ${actor}`);
+            if (!ALLOWED_NAMES[actor]) {
+                core.info(`PR #${pr.number} is not from an approved source (${actor})`);
+                return;
             }
             const client = new github.GitHub(token);
             core.debug(`Creating approving review for pull request #${pr.number}`);
@@ -1462,9 +1468,9 @@ function run() {
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo,
                 pull_number: pr.number,
-                event: "APPROVE"
+                event: 'APPROVE',
             });
-            core.debug(`Approved pull request #${pr.number}`);
+            core.info(`Approved pull request #${pr.number}`);
         }
         catch (error) {
             core.setFailed(error.message);
