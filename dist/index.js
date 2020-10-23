@@ -1449,7 +1449,74 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const github = __importStar(__webpack_require__(469));
-const ALLOWED_NAMES = ['dependabot[bot]', 'dependabot-preview[bot]'].reduce((acc, name) => (Object.assign(Object.assign({}, acc), { [name]: true })), {});
+const ALLOWED_COMMITTERS = [
+    'dependabot[bot]',
+    'dependabot-preview[bot]',
+].reduce((acc, name) => (Object.assign(Object.assign({}, acc), { [name]: true })), {});
+const ALLOWED_REVIEWERS = ['github-actions[bot]'].reduce((acc, name) => (Object.assign(Object.assign({}, acc), { [name]: true })), {});
+function all_committers_allowed(client, pr) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // Get a pull request
+            const { data: pullRequest } = yield client.pulls.get({
+                owner: github.context.repo.owner,
+                repo: github.context.repo.repo,
+                pull_number: pr.number,
+            });
+            // Get creator of PR
+            const pr_user = pullRequest.user.login;
+            core.info(`PR #${pr.number} opened from ${pr_user}`);
+            // Get list of commits on a PR
+            const { data: listCommits } = yield client.pulls.listCommits({
+                owner: github.context.repo.owner,
+                repo: github.context.repo.repo,
+                pull_number: pr.number,
+            });
+            // Get all committers on a PR
+            for (let commit of listCommits) {
+                // Check if there are committers other than ALLOWED_COMMITTERS
+                if (!ALLOWED_COMMITTERS[commit.author.login]) {
+                    core.info(`Commit ${commit.sha} is not from an approved source (${commit.author.login})`);
+                    // Remove approvals by dependabot if any
+                    yield remove_dependabot_approvals(client, pr);
+                    return false;
+                }
+            }
+        }
+        catch (error) {
+            core.setFailed(error.message);
+        }
+        return true;
+    });
+}
+function remove_dependabot_approvals(client, pr) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // Get list of all reviews on a PR
+            const { data: listReviews } = yield client.pulls.listReviews({
+                owner: github.context.repo.owner,
+                repo: github.context.repo.repo,
+                pull_number: pr.number,
+            });
+            // Check if there is an approval by ALLOWED_REVIEWERS
+            for (let review of listReviews) {
+                if (ALLOWED_REVIEWERS[review.user.login] && review.state === `APPROVED`) {
+                    core.info(`Removing an approval from ${review.user.login}`);
+                    yield client.pulls.dismissReview({
+                        owner: github.context.repo.owner,
+                        repo: github.context.repo.repo,
+                        pull_number: pr.number,
+                        review_id: review.id,
+                        message: `A commit was added after a dependabot approval`,
+                    });
+                }
+            }
+        }
+        catch (error) {
+            core.setFailed(error.message);
+        }
+    });
+}
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -1459,29 +1526,8 @@ function run() {
                 throw new Error('Event payload missing `pull_request`');
             }
             const client = new github.GitHub(token);
-            // Get a pull request
-            const { data: pullRequest } = yield client.pulls.get({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                pull_number: pr.number,
-            });
-            // Get creator of pull request
-            const pr_user = pullRequest.user.login;
-            core.info(`PR #${pr.number} opened from ${pr_user}`);
-            // Get list of commits on a pull request
-            const { data: listCommits } = yield client.pulls.listCommits({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                pull_number: pr.number,
-            });
-            // Get all commiters on a pull request
-            for (let commit of listCommits) {
-                // Check if there are commiters other than ALLOWED_NAMES
-                if (!ALLOWED_NAMES[commit.author.login]) {
-                    core.info(`Commit ${commit.sha} is not from an approved source (${commit.author.login})`);
-                    return;
-                }
-            }
+            if (!(yield all_committers_allowed(client, pr)))
+                return;
             core.debug(`Creating approving review for pull request #${pr.number}`);
             yield client.pulls.createReview({
                 owner: github.context.repo.owner,
