@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/cognitedata/auto-approve-dependabot-action#readme",
   "dependencies": {
-    "@actions/core": "^1.2.0",
+    "@actions/core": "^1.2.6",
     "@actions/github": "^2.1.1"
   },
   "devDependencies": {
