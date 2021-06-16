@@ -1,45 +1,31 @@
-# Auto Approve GitHub Action
+# Auto Approve GitHub Dependabot Action
 
-**Name:** `hmarr/auto-approve-action`
+**Name:** `cognitedata/auto-approve-dependabot-action`
+
+This is a fork of `hmarr/auto-approve-action`.
 
 Automatically approve GitHub pull requests. The `GITHUB_TOKEN` secret must be provided as the `github-token` input for the action to work.
 
-**Important:** use v2.0.0 or later, as v1 was designed for the initial GitHub Actions beta, and no longer works.
-
 ## Usage instructions
 
-Create a workflow file (e.g. `.github/workflows/auto-approve.yml`) that contains a step that `uses: hmarr/auto-approve-action@v2.0.0`. Here's an example workflow file:
+Create a workflow file (e.g. `.github/workflows/auto-approve.yml`) that contains a step that `uses: cognitedata/auto-approve-dependabot-action@v3.0.1`. Here's an example workflow file:
 
 ```yaml
-name: Auto approve
-on: pull_request
+name: Auto approve PRs by dependabot
+
+# Trigger the workflow on pull request
+on: pull_request_target
 
 jobs:
-  build:
+  autoapprove:
+    name: Auto-Approve a PR by dependabot
     runs-on: ubuntu-latest
     steps:
-    - uses: hmarr/auto-approve-action@v2.0.0
-      with:
-        github-token: "${{ secrets.GITHUB_TOKEN }}"
-```
-
-
-Combine with an `if` clause to only auto-approve certain users. For example, to auto-approve [Dependabot][dependabot] pull requests, use:
-
-```yaml
-name: Auto approve
-
-on:
-  pull_request
-
-jobs:
-  auto-approve:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: hmarr/auto-approve-action@v2.0.0
-      if: github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]'
-      with:
-        github-token: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Auto approve
+        uses: cognitedata/auto-approve-dependabot-action@v3.0.1
+        if: github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ## Why?
