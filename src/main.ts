@@ -1,11 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 
-let ALLOWED_COMMITTERS = {};
-
-let ALLOWED_REVIEWERS = {};
-
-async function all_committers_allowed(client: any, pr: any) {
+async function all_committers_allowed(config, client: any, pr: any) {
   // Get a pull request
   const { data: pullRequest } = await client.pulls.get({
     owner: github.context.repo.owner,
@@ -27,20 +23,20 @@ async function all_committers_allowed(client: any, pr: any) {
 
   // Get all committers on a PR
   for (let commit of listCommits) {
-    // Check if there are committers other than ALLOWED_COMMITTERS
-    if (!ALLOWED_COMMITTERS[commit.author.login]) {
+    // Check if there are committers other than those in trustedCommitters
+    if (!config.trustedCommitters[commit.author.login]) {
       core.info(
         `Commit ${commit.sha} is not from an approved source (${commit.author.login})`
       );
       // Remove approvals by dependabot if any
-      await remove_dependabot_approvals(client, pr);
+      await remove_dependabot_approvals(config, client, pr);
       return false;
     }
   }
   return true;
 }
 
-async function remove_dependabot_approvals(client: any, pr: any) {
+async function remove_dependabot_approvals(config, client: any, pr: any) {
   // Get list of all reviews on a PR
   const { data: listReviews } = await client.pulls.listReviews({
     owner: github.context.repo.owner,
@@ -48,9 +44,9 @@ async function remove_dependabot_approvals(client: any, pr: any) {
     pull_number: pr.number,
   });
 
-  // Check if there is an approval by ALLOWED_REVIEWERS
+  // Check if there is an approval by those in manageApprovalsForRevewers
   for (let review of listReviews) {
-    if (ALLOWED_REVIEWERS[review.user.login] && review.state === `APPROVED`) {
+    if (config.manageApprovalsForRevewers[review.user.login] && review.state === `APPROVED`) {
       core.info(`Removing an approval from ${review.user.login}`);
       await client.pulls.dismissReview({
         owner: github.context.repo.owner,
@@ -67,14 +63,17 @@ async function run() {
   try {
     const token = core.getInput('github-token', { required: true });
 
-    ALLOWED_COMMITTERS = core.getInput('trusted-committers').split(/, */).reduce(
-      (acc, name) => ({ ...acc, [name]: true }),
-      {}
-    );
-    ALLOWED_REVIEWERS = core.getInput('manage-approvals-for-reviewers').split(/, */).reduce(
-      (acc, name) => ({ ...acc, [name]: true }),
-      {}
-    );
+    const config = {
+      trustedCommitters: core.getInput('trusted-committers').split(/, */).reduce(
+        (acc, name) => ({ ...acc, [name]: true }),
+        {}
+      ),
+      manageApprovalsForRevewers: core.getInput('manage-approvals-for-reviewers').split(/, */).reduce(
+        (acc, name) => ({ ...acc, [name]: true }),
+        {}
+      ),
+    };
+
 
     const { pull_request: pr } = github.context.payload;
     if (!pr) {
@@ -83,7 +82,7 @@ async function run() {
 
     const client = new github.GitHub(token);
 
-    if (!(await all_committers_allowed(client, pr))) return;
+    if (!(await all_committers_allowed(config, client, pr))) return;
 
     core.debug(`Creating approving review for pull request #${pr.number}`);
     await client.pulls.createReview({
