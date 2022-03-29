@@ -35,8 +35,8 @@ jobs:
         if: github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]' # this is optional
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          trusted-committers: 'dependabot[bot], github-actions[bot], james-hu'  # optional, default to "dependabot[bot],dependabot-preview[bot]"
-          manage-approvals-for-reviewers: ''dependabot[bot]'  # optional, default to "github-actions[bot]"
+          trusted-committers: dependabot[bot], github-actions[bot], james-hu  # optional, default to "dependabot[bot],dependabot-preview[bot]"
+          manage-approvals-for-reviewers: dependabot[bot]  # optional, default to "github-actions[bot]"
 ```
 
 ## Why?
