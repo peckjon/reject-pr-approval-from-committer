@@ -73,7 +73,12 @@ async function run() {
         {}
       ),
     };
-
+    core.info(
+      `trustedCommitters are: ${Object.keys(config.trustedCommitters)}`
+    );
+    core.info(
+      `manageApprovalsForRevewers are: ${Object.keys(config.manageApprovalsForRevewers)}`
+    );
 
     const { pull_request: pr } = github.context.payload;
     if (!pr) {
