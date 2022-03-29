@@ -26,7 +26,7 @@ async function all_committers_allowed(config, client: any, pr: any) {
     // Check if there are committers other than those in trustedCommitters
     if (!config.trustedCommitters[commit.author.login]) {
       core.info(
-        `Commit ${commit.sha} is not from an approved source (${commit.author.login})`
+        `Commit ${commit.sha} made by ${commit.author.login} is not from trusted committers (${JSON.stringify(Object.keys(config.trustedCommitters))})`
       );
       // Remove approvals by dependabot if any
       await remove_dependabot_approvals(config, client, pr);
@@ -64,11 +64,11 @@ async function run() {
     const token = core.getInput('github-token', { required: true });
 
     const config = {
-      trustedCommitters: core.getInput('trusted-committers').split(/, */).reduce(
+      trustedCommitters: core.getInput('trusted-committers').split(/,\s*/).reduce(
         (acc, name) => ({ ...acc, [name]: true }),
         {}
       ),
-      manageApprovalsForRevewers: core.getInput('manage-approvals-for-reviewers').split(/, */).reduce(
+      manageApprovalsForRevewers: core.getInput('manage-approvals-for-reviewers').split(/,\s*/).reduce(
         (acc, name) => ({ ...acc, [name]: true }),
         {}
       ),
