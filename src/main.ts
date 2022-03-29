@@ -1,15 +1,9 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 
-const ALLOWED_COMMITTERS = [
-  'dependabot[bot]',
-  'dependabot-preview[bot]',
-].reduce((acc, name) => ({ ...acc, [name]: true }), {});
+let ALLOWED_COMMITTERS = {};
 
-const ALLOWED_REVIEWERS = ['github-actions[bot]'].reduce(
-  (acc, name) => ({ ...acc, [name]: true }),
-  {}
-);
+let ALLOWED_REVIEWERS = {};
 
 async function all_committers_allowed(client: any, pr: any) {
   // Get a pull request
@@ -72,6 +66,15 @@ async function remove_dependabot_approvals(client: any, pr: any) {
 async function run() {
   try {
     const token = core.getInput('github-token', { required: true });
+
+    ALLOWED_COMMITTERS = core.getInput('trusted-committers').split(/, */).reduce(
+      (acc, name) => ({ ...acc, [name]: true }),
+      {}
+    );
+    ALLOWED_REVIEWERS = core.getInput('manage-approvals-for-reviewers').split(/, */).reduce(
+      (acc, name) => ({ ...acc, [name]: true }),
+      {}
+    );
 
     const { pull_request: pr } = github.context.payload;
     if (!pr) {
