@@ -1721,8 +1721,6 @@ function run() {
                 trustedCommitters: core.getInput('trusted-committers').split(/,\s*/).reduce((acc, name) => (Object.assign(Object.assign({}, acc), { [name]: true })), {}),
                 manageApprovalsForRevewers: core.getInput('manage-approvals-for-reviewers').split(/,\s*/).reduce((acc, name) => (Object.assign(Object.assign({}, acc), { [name]: true })), {}),
             };
-            core.info(`trustedCommitters are: ${Object.keys(config.trustedCommitters)}`);
-            core.info(`manageApprovalsForRevewers are: ${Object.keys(config.manageApprovalsForRevewers)}`);
             const { pull_request: pr } = github.context.payload;
             if (!pr) {
                 throw new Error('Event payload missing `pull_request`');
