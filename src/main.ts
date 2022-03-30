@@ -1,21 +1,22 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 
-async function all_committers_allowed(config, client: any, pr: any) {
+type GitHub = ReturnType<typeof github.getOctokit>;
+async function all_committers_allowed(config, client: GitHub, pr: any) {
   // Get a pull request
-  const { data: pullRequest } = await client.pulls.get({
+  const { data: pullRequest } = await client.rest.pulls.get({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     pull_number: pr.number,
   });
 
   // Get creator of PR
-  const pr_user = pullRequest.user.login;
+  const pr_user = pullRequest.user?.login;
 
   core.info(`PR #${pr.number} opened by ${pr_user}`);
 
   // Get list of commits on a PR
-  const { data: listCommits } = await client.pulls.listCommits({
+  const { data: listCommits } = await client.rest.pulls.listCommits({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     pull_number: pr.number,
@@ -24,10 +25,10 @@ async function all_committers_allowed(config, client: any, pr: any) {
   // Get all committers on a PR
   for (let commit of listCommits) {
     // Check if there are committers other than those in trustedCommitters
-    if (!config.trustedCommitters[commit.author.login]) {
+    if (!config.trustedCommitters[commit.author?.login ?? '!']) {
       core.info(
         `Commit ${commit.sha} made by ${
-          commit.author.login
+          commit.author?.login
         } is not from trusted committers (${JSON.stringify(
           Object.keys(config.trustedCommitters)
         )})`
@@ -40,9 +41,9 @@ async function all_committers_allowed(config, client: any, pr: any) {
   return true;
 }
 
-async function remove_dependabot_approvals(config, client: any, pr: any) {
+async function remove_dependabot_approvals(config, client: GitHub, pr: any) {
   // Get list of all reviews on a PR
-  const { data: listReviews } = await client.pulls.listReviews({
+  const { data: listReviews } = await client.rest.pulls.listReviews({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     pull_number: pr.number,
@@ -51,11 +52,11 @@ async function remove_dependabot_approvals(config, client: any, pr: any) {
   // Check if there is an approval by those in manageApprovalsForRevewers
   for (let review of listReviews) {
     if (
-      config.manageApprovalsForRevewers[review.user.login] &&
+      config.manageApprovalsForRevewers[review.user?.login ?? '!'] &&
       review.state === `APPROVED`
     ) {
-      core.info(`Removing an approval from ${review.user.login}`);
-      await client.pulls.dismissReview({
+      core.info(`Removing an approval from ${review.user?.login}`);
+      await client.rest.pulls.dismissReview({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
         pull_number: pr.number,
