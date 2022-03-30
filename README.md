@@ -1,4 +1,4 @@
-# Auto Approve By Committers GitHub Action
+# Automatically approve the PR based on a whitelist of trusted committers
 
 **Name:** `james-hu/auto-approve-by-committers-action`
 
