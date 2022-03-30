@@ -1,8 +1,8 @@
 name: 'Auto approve PR based on a whitelist of trusted committers'
 description: 'Automatically approve the PR based on a whitelist of trusted committers'
 branding:
-  icon: 'check-circle'
-  color: 'green'
+  icon: 'thumbs-up'
+  color: 'blue'
 inputs:
   github-token:
     description: 'The GITHUB_TOKEN secret'
