@@ -1,7 +1,7 @@
 {
-  "name": "auto-approve-dependabot-action",
-  "version": "2.0.1",
-  "description": "Automatically approve dependabot pull requests",
+  "name": "auto-approve-by-committers-action",
+  "version": "4.0.0",
+  "description": "Automatically approve GitHub pull requests based on a whitelist of trusted committers.",
   "main": "dist/main.ts",
   "scripts": {
     "build": "ncc build src/main.ts",
@@ -11,17 +11,26 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cognitedata/auto-approve-dependabot-action.git"
+    "url": "git+https://github.com/james-hu/auto-approve-by-committers-action.git"
   },
   "keywords": [
-    "actions"
+    "actions",
+    "pr",
+    "pull request",
+    "approve",
+    "github",
+    "GitHub"
   ],
-  "author": "Cognite AS",
+  "author": "James Hu",
+  "contributors": [
+    "Cognite AS",
+    "James Hu"
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cognitedata/auto-approve-dependabot-action/issues"
+    "url": "https://github.com/james-hu/auto-approve-by-committers-action/issues"
   },
-  "homepage": "https://github.com/cognitedata/auto-approve-dependabot-action#readme",
+  "homepage": "https://github.com/james-hu/auto-approve-by-committers-action#readme",
   "dependencies": {
     "@actions/core": "^1.2.6",
     "@actions/github": "^2.1.1"

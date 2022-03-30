@@ -4,7 +4,7 @@
 
 This is a fork of `cognitedata/auto-approve-dependabot-action` which is in turn a fork of `hmarr/auto-approve-action`.
 
-Automatically approve GitHub pull requests based on committers.
+Automatically approve GitHub pull requests based on a whitelist of trusted committers.
 
 PRs with only commits from trusted committers would be automatically approved by this action.
 List of trusted committers can be specified in `trusted-committers`.
