@@ -12,7 +12,7 @@ async function all_committers_allowed(config, client: any, pr: any) {
   // Get creator of PR
   const pr_user = pullRequest.user.login;
 
-  core.info(`PR #${pr.number} opened from ${pr_user}`);
+  core.info(`PR #${pr.number} opened by ${pr_user}`);
 
   // Get list of commits on a PR
   const { data: listCommits } = await client.pulls.listCommits({
@@ -60,7 +60,7 @@ async function remove_dependabot_approvals(config, client: any, pr: any) {
         repo: github.context.repo.repo,
         pull_number: pr.number,
         review_id: review.id,
-        message: `A commit was added after a dependabot approval`,
+        message: `A commit was added after an auto approval`,
       });
     }
   }
