@@ -375,18 +375,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const github = __importStar(__webpack_require__(469));
 function all_committers_allowed(config, client, pr) {
+    var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
         // Get a pull request
-        const { data: pullRequest } = yield client.pulls.get({
+        const { data: pullRequest } = yield client.rest.pulls.get({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             pull_number: pr.number,
         });
         // Get creator of PR
-        const pr_user = pullRequest.user.login;
+        const pr_user = (_a = pullRequest.user) === null || _a === void 0 ? void 0 : _a.login;
         core.info(`PR #${pr.number} opened by ${pr_user}`);
         // Get list of commits on a PR
-        const { data: listCommits } = yield client.pulls.listCommits({
+        const { data: listCommits } = yield client.rest.pulls.listCommits({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             pull_number: pr.number,
@@ -394,8 +395,8 @@ function all_committers_allowed(config, client, pr) {
         // Get all committers on a PR
         for (let commit of listCommits) {
             // Check if there are committers other than those in trustedCommitters
-            if (!config.trustedCommitters[commit.author.login]) {
-                core.info(`Commit ${commit.sha} made by ${commit.author.login} is not from trusted committers (${JSON.stringify(Object.keys(config.trustedCommitters))})`);
+            if (!config.trustedCommitters[(_c = (_b = commit.author) === null || _b === void 0 ? void 0 : _b.login) !== null && _c !== void 0 ? _c : '!']) {
+                core.info(`Commit ${commit.sha} made by ${(_d = commit.author) === null || _d === void 0 ? void 0 : _d.login} is not from trusted committers (${JSON.stringify(Object.keys(config.trustedCommitters))})`);
                 // Remove approvals by dependabot if any
                 yield remove_dependabot_approvals(config, client, pr);
                 return false;
@@ -405,19 +406,20 @@ function all_committers_allowed(config, client, pr) {
     });
 }
 function remove_dependabot_approvals(config, client, pr) {
+    var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
         // Get list of all reviews on a PR
-        const { data: listReviews } = yield client.pulls.listReviews({
+        const { data: listReviews } = yield client.rest.pulls.listReviews({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             pull_number: pr.number,
         });
         // Check if there is an approval by those in manageApprovalsForRevewers
         for (let review of listReviews) {
-            if (config.manageApprovalsForRevewers[review.user.login] &&
+            if (config.manageApprovalsForRevewers[(_b = (_a = review.user) === null || _a === void 0 ? void 0 : _a.login) !== null && _b !== void 0 ? _b : '!'] &&
                 review.state === `APPROVED`) {
-                core.info(`Removing an approval from ${review.user.login}`);
-                yield client.pulls.dismissReview({
+                core.info(`Removing an approval from ${(_c = review.user) === null || _c === void 0 ? void 0 : _c.login}`);
+                yield client.rest.pulls.dismissReview({
                     owner: github.context.repo.owner,
                     repo: github.context.repo.repo,
                     pull_number: pr.number,
