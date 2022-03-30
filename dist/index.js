@@ -384,7 +384,7 @@ function all_committers_allowed(config, client, pr) {
         });
         // Get creator of PR
         const pr_user = pullRequest.user.login;
-        core.info(`PR #${pr.number} opened from ${pr_user}`);
+        core.info(`PR #${pr.number} opened by ${pr_user}`);
         // Get list of commits on a PR
         const { data: listCommits } = yield client.pulls.listCommits({
             owner: github.context.repo.owner,
@@ -422,7 +422,7 @@ function remove_dependabot_approvals(config, client, pr) {
                     repo: github.context.repo.repo,
                     pull_number: pr.number,
                     review_id: review.id,
-                    message: `A commit was added after a dependabot approval`,
+                    message: `A commit was added after an auto approval`,
                 });
             }
         }
