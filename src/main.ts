@@ -86,19 +86,19 @@ async function run() {
       throw new Error('Event payload missing `pull_request`');
     }
 
-    const client = new github.GitHub(token);
+    const client = github.getOctokit(token);
 
     if (!(await all_committers_allowed(config, client, pr))) return;
 
     core.debug(`Creating approving review for pull request #${pr.number}`);
-    await client.pulls.createReview({
+    await client.rest.pulls.createReview({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
       pull_number: pr.number,
       event: 'APPROVE',
     });
     core.info(`Approved pull request #${pr.number}`);
-  } catch (error) {
+  } catch (error: any) {
     core.setFailed(error.message);
   }
 }
