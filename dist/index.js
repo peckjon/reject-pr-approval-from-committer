@@ -374,7 +374,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const github = __importStar(__webpack_require__(469));
-function all_committers_allowed(config, client, pr) {
+function approveIfAllCommittersAreTrusted(config, client, pr) {
     var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
         // Get a pull request
@@ -385,7 +385,7 @@ function all_committers_allowed(config, client, pr) {
         });
         // Get creator of PR
         const pr_user = (_a = pullRequest.user) === null || _a === void 0 ? void 0 : _a.login;
-        core.info(`PR #${pr.number} opened by ${pr_user}`);
+        core.info(`PR #${pr.number} was opened by ${pr_user}`);
         // Get list of commits on a PR
         const { data: listCommits } = yield client.rest.pulls.listCommits({
             owner: github.context.repo.owner,
@@ -396,17 +396,23 @@ function all_committers_allowed(config, client, pr) {
         for (let commit of listCommits) {
             // Check if there are committers other than those in trustedCommitters
             if (!config.trustedCommitters[(_c = (_b = commit.author) === null || _b === void 0 ? void 0 : _b.login) !== null && _c !== void 0 ? _c : '!']) {
-                core.info(`Commit ${commit.sha} made by ${(_d = commit.author) === null || _d === void 0 ? void 0 : _d.login} is not from trusted committers (${JSON.stringify(Object.keys(config.trustedCommitters))})`);
-                // Remove approvals by dependabot if any
-                yield remove_dependabot_approvals(config, client, pr);
+                core.info(`Will not approve PR #${pr.number} because at least one commit (${commit.sha.substring(0, 7)}) was made by ${(_d = commit.author) === null || _d === void 0 ? void 0 : _d.login} who is not one of the trusted committers: ${JSON.stringify(Object.keys(config.trustedCommitters))}`);
                 return false;
             }
         }
+        core.debug(`Creating approving review for pull request #${pr.number}`);
+        yield client.rest.pulls.createReview({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            pull_number: pr.number,
+            event: 'APPROVE',
+        });
+        core.info(`Approved pull request #${pr.number}`);
         return true;
     });
 }
-function remove_dependabot_approvals(config, client, pr) {
-    var _a, _b, _c;
+function removeExistingApprovalsIfExist(config, client, pr) {
+    var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
         // Get list of all reviews on a PR
         const { data: listReviews } = yield client.rest.pulls.listReviews({
@@ -426,6 +432,7 @@ function remove_dependabot_approvals(config, client, pr) {
                     review_id: review.id,
                     message: `A commit was added after an auto approval`,
                 });
+                core.info(`Removed approval from ${(_d = review.user) === null || _d === void 0 ? void 0 : _d.login}`);
             }
         }
     });
@@ -446,19 +453,12 @@ function run() {
             };
             const { pull_request: pr } = github.context.payload;
             if (!pr) {
-                throw new Error('Event payload missing `pull_request`');
+                throw new Error('Event payload missing `pull_request` - workflow containing this action is supposed to be triggered by `pull_request` or `pull_request_target` event');
             }
             const client = github.getOctokit(token);
-            if (!(yield all_committers_allowed(config, client, pr)))
-                return;
-            core.debug(`Creating approving review for pull request #${pr.number}`);
-            yield client.rest.pulls.createReview({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                pull_number: pr.number,
-                event: 'APPROVE',
-            });
-            core.info(`Approved pull request #${pr.number}`);
+            if (!(yield approveIfAllCommittersAreTrusted(config, client, pr))) {
+                yield removeExistingApprovalsIfExist(config, client, pr);
+            }
         }
         catch (error) {
             core.setFailed(error.message);
