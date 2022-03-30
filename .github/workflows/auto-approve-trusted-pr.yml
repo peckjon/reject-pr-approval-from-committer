@@ -1,0 +1,21 @@
+name: Auto approve trusted PR
+
+on:
+  pull_request_target:
+    branches:    
+      - master
+      - main
+      - develop
+
+jobs:
+  autoapprove:
+    name: Auto approve trusted PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto approve
+        uses: handy-common-utils/conditionally-approve-pr-from-trusted-committers@master
+        if: github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]' # this is optional
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }} # required, feel free to use another PAT
+          trusted-committers: dependabot[bot], github-actions[bot]  # optional, default to "dependabot[bot],dependabot-preview[bot]"
+          manage-approvals-for-reviewers: github-actions[bot]  # optional, default to "github-actions[bot]"
