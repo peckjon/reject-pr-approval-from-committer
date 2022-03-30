@@ -22,6 +22,8 @@ you need to make sure that the credential used by this action is not the same as
 Create a workflow file (e.g. `.github/workflows/auto-approve.yml`) that contains a step 
 that has `uses: handy-common-utils/conditionally-approve-pr-from-trusted-committers`.
 
+The workflow using this action is supposed to be triggered by `pull_request` or `pull_request_target` event.
+
 Here's an example workflow file:
 
 ```yaml
