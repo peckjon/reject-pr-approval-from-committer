@@ -5,7 +5,7 @@ branding:
   color: 'blue'
 inputs:
   github-token:
-    description: 'The GITHUB_TOKEN secret'
+    description: 'The GITHUB_TOKEN secret or PAT'
     required: true
   trusted-committers:
     description: 'Logins/IDs of committers that would be trusted for auto approval'
