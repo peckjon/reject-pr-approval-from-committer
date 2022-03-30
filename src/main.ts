@@ -26,7 +26,11 @@ async function all_committers_allowed(config, client: any, pr: any) {
     // Check if there are committers other than those in trustedCommitters
     if (!config.trustedCommitters[commit.author.login]) {
       core.info(
-        `Commit ${commit.sha} made by ${commit.author.login} is not from trusted committers (${JSON.stringify(Object.keys(config.trustedCommitters))})`
+        `Commit ${commit.sha} made by ${
+          commit.author.login
+        } is not from trusted committers (${JSON.stringify(
+          Object.keys(config.trustedCommitters)
+        )})`
       );
       // Remove approvals by dependabot if any
       await remove_dependabot_approvals(config, client, pr);
@@ -46,7 +50,10 @@ async function remove_dependabot_approvals(config, client: any, pr: any) {
 
   // Check if there is an approval by those in manageApprovalsForRevewers
   for (let review of listReviews) {
-    if (config.manageApprovalsForRevewers[review.user.login] && review.state === `APPROVED`) {
+    if (
+      config.manageApprovalsForRevewers[review.user.login] &&
+      review.state === `APPROVED`
+    ) {
       core.info(`Removing an approval from ${review.user.login}`);
       await client.pulls.dismissReview({
         owner: github.context.repo.owner,
@@ -64,14 +71,14 @@ async function run() {
     const token = core.getInput('github-token', { required: true });
 
     const config = {
-      trustedCommitters: core.getInput('trusted-committers').split(/,\s*/).reduce(
-        (acc, name) => ({ ...acc, [name]: true }),
-        {}
-      ),
-      manageApprovalsForRevewers: core.getInput('manage-approvals-for-reviewers').split(/,\s*/).reduce(
-        (acc, name) => ({ ...acc, [name]: true }),
-        {}
-      ),
+      trustedCommitters: core
+        .getInput('trusted-committers')
+        .split(/,\s*/)
+        .reduce((acc, name) => ({ ...acc, [name]: true }), {}),
+      manageApprovalsForRevewers: core
+        .getInput('manage-approvals-for-reviewers')
+        .split(/,\s*/)
+        .reduce((acc, name) => ({ ...acc, [name]: true }), {}),
     };
 
     const { pull_request: pr } = github.context.payload;
