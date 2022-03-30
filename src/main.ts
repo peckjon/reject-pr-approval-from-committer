@@ -2,7 +2,12 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 
 type GitHub = ReturnType<typeof github.getOctokit>;
-async function all_committers_allowed(config, client: GitHub, pr: any) {
+
+async function approveIfAllCommittersAreTrusted(
+  config,
+  client: GitHub,
+  pr: any
+) {
   // Get a pull request
   const { data: pullRequest } = await client.rest.pulls.get({
     owner: github.context.repo.owner,
@@ -13,7 +18,7 @@ async function all_committers_allowed(config, client: GitHub, pr: any) {
   // Get creator of PR
   const pr_user = pullRequest.user?.login;
 
-  core.info(`PR #${pr.number} opened by ${pr_user}`);
+  core.info(`PR #${pr.number} was opened by ${pr_user}`);
 
   // Get list of commits on a PR
   const { data: listCommits } = await client.rest.pulls.listCommits({
@@ -27,21 +32,34 @@ async function all_committers_allowed(config, client: GitHub, pr: any) {
     // Check if there are committers other than those in trustedCommitters
     if (!config.trustedCommitters[commit.author?.login ?? '!']) {
       core.info(
-        `Commit ${commit.sha} made by ${
+        `Will not approve PR #${
+          pr.number
+        } because at least one commit (${commit.sha.substring(
+          0,
+          7
+        )}) was made by ${
           commit.author?.login
-        } is not from trusted committers (${JSON.stringify(
+        } who is not one of the trusted committers: ${JSON.stringify(
           Object.keys(config.trustedCommitters)
-        )})`
+        )}`
       );
-      // Remove approvals by dependabot if any
-      await remove_dependabot_approvals(config, client, pr);
       return false;
     }
   }
+
+  core.debug(`Creating approving review for pull request #${pr.number}`);
+  await client.rest.pulls.createReview({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    pull_number: pr.number,
+    event: 'APPROVE',
+  });
+  core.info(`Approved pull request #${pr.number}`);
+
   return true;
 }
 
-async function remove_dependabot_approvals(config, client: GitHub, pr: any) {
+async function removeExistingApprovalsIfExist(config, client: GitHub, pr: any) {
   // Get list of all reviews on a PR
   const { data: listReviews } = await client.rest.pulls.listReviews({
     owner: github.context.repo.owner,
@@ -63,6 +81,7 @@ async function remove_dependabot_approvals(config, client: GitHub, pr: any) {
         review_id: review.id,
         message: `A commit was added after an auto approval`,
       });
+      core.info(`Removed approval from ${review.user?.login}`);
     }
   }
 }
@@ -84,21 +103,16 @@ async function run() {
 
     const { pull_request: pr } = github.context.payload;
     if (!pr) {
-      throw new Error('Event payload missing `pull_request`');
+      throw new Error(
+        'Event payload missing `pull_request` - workflow containing this action is supposed to be triggered by `pull_request` or `pull_request_target` event'
+      );
     }
 
     const client = github.getOctokit(token);
 
-    if (!(await all_committers_allowed(config, client, pr))) return;
-
-    core.debug(`Creating approving review for pull request #${pr.number}`);
-    await client.rest.pulls.createReview({
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      pull_number: pr.number,
-      event: 'APPROVE',
-    });
-    core.info(`Approved pull request #${pr.number}`);
+    if (!(await approveIfAllCommittersAreTrusted(config, client, pr))) {
+      await removeExistingApprovalsIfExist(config, client, pr);
+    }
   } catch (error) {
     core.setFailed((error as Error).message);
   }
