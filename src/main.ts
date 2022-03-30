@@ -98,8 +98,8 @@ async function run() {
       event: 'APPROVE',
     });
     core.info(`Approved pull request #${pr.number}`);
-  } catch (error: any) {
-    core.setFailed(error.message);
+  } catch (error) {
+    core.setFailed((error as Error).message);
   }
 }
 
