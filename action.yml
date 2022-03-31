@@ -1,5 +1,5 @@
-name: 'Conditionally approve the PR if all commits are made by trusted committers'
-description: 'Approve GitHub pull request if all commits in the PR are made by users on a configurable whitelist of trusted committers.'
+name: 'Conditionally approve the PR if all commits were made by trusted committers'
+description: 'Approve GitHub pull request if all commits in the PR were made by users on a configurable whitelist of trusted committers.'
 branding:
   icon: 'thumbs-up'
   color: 'blue'

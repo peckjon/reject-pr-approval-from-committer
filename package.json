@@ -1,7 +1,7 @@
 {
   "name": "@handy-common-utils/conditionally-approve-pr-from-trusted-committers",
   "version": "5.0.0",
-  "description": "Approve GitHub pull request if all commits in the PR are made by users on a configurable whitelist of trusted committers. When used together with auto-merge feature, fully automated CI/CD could be easily achieved.",
+  "description": "Approve GitHub pull request if all commits in the PR were made by users on a configurable whitelist of trusted committers. When used together with auto-merge feature, fully automated CI/CD could be easily achieved.",
   "main": "dist/main.ts",
   "scripts": {
     "build": "npm run format && ncc build src/main.ts",
