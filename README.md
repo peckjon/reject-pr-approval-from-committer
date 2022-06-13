@@ -1,4 +1,4 @@
-# GitHub Action: don not allow committers on a Pull Request to approve the PR
+# GitHub Action: do not allow committers on a Pull Request to approve the PR
 
 **Name:** `peckjon/reject-pr-approval-from-committer`
 
