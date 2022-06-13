@@ -1,21 +1,13 @@
 name: 'Conditionally approve the PR if all commits were made by trusted committers'
 description: 'Approve GitHub pull request if all commits in the PR were made by users on a configurable whitelist of trusted committers.'
 branding:
-  icon: 'thumbs-up'
-  color: 'blue'
-author: James Hu
+  icon: 'thumbs-down'
+  color: 'red'
+author: Jon Peck
 inputs:
   github-token:
     description: 'The GITHUB_TOKEN secret or PAT'
     required: true
-  trusted-committers:
-    description: 'Logins/IDs of committers that would be trusted for auto approval'
-    required: false
-    default: 'dependabot[bot],dependabot-preview[bot]'
-  manage-approvals-for-reviewers:
-    description: 'Logins/IDs of reviewers for which this action could dismiss their approvals'
-    required: false
-    default: 'github-actions[bot]'
 runs:
   using: 'node12'
   main: 'dist/index.js'
