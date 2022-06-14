@@ -19,18 +19,16 @@ Here's an example workflow file:
 name: Prevent committers from approvaing a PR
 
 on:
-  pull_request_target:
-    branches:    
-      - master
-      - main
-      - develop
+  pull_request_review:
+    types: [submitted]
 
 jobs:
   preventapprove:
     name: reject PR approval by committers to the PR
     runs-on: ubuntu-latest
+    if: github.event.review.state == 'approved'
     steps:
-      - name: Reject approve
+      - name: Dismiss code reviews from collaborators
         uses: peckjon/reject-pr-approval-from-committer@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
