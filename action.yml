@@ -1,5 +1,5 @@
-name: 'Conditionally approve the PR if all commits were made by trusted committers'
-description: 'Approve GitHub pull request if all commits in the PR were made by users on a configurable whitelist of trusted committers.'
+name: 'Dismiss code reviews from collaborators'
+description: 'Dismiss code reviews on pull requests from anyone worked on it.'
 branding:
   icon: 'thumbs-down'
   color: 'red'
@@ -8,6 +8,7 @@ inputs:
   github-token:
     description: 'The GITHUB_TOKEN secret or PAT'
     required: true
+    default: '${{ secrets.GITHUB_TOKEN }}'
 runs:
   using: 'node12'
   main: 'dist/index.js'

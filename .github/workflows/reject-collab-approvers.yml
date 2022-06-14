@@ -1,0 +1,18 @@
+name: Dismiss code reviews from collaborators
+
+on:
+  pull_request_target:
+    branches:
+      - master
+      - main
+      - develop
+
+
+jobs:
+  approver-vibe-check:
+    name: Dismiss code reviews from collaborators
+    runs-on: ubuntu-latest
+    if: github.event.review.state == 'approved'
+    steps:
+      - name: Dismiss code reviews from collaborators
+        uses: ./
