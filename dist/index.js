@@ -407,7 +407,7 @@ function removeExistingApprovalsIfExist(client, pr) {
                     review_id: review.id,
                     message: `${(_c = review.user) === null || _c === void 0 ? void 0 : _c.login} cannot approve this PR since they committed to it`,
                 });
-                core.info(`dismissResponse: ${JSON.stringify(dismissResponse)}`);
+                core.debug(`dismissResponse: ${JSON.stringify(dismissResponse)}`);
                 core.setFailed(`${(_d = review.user) === null || _d === void 0 ? void 0 : _d.login} cannot approve this PR since they committed to it`);
             }
         }
