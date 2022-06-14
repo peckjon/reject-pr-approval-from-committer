@@ -31,7 +31,8 @@ async function removeExistingApprovalsIfExist(client: GitHub, pr: any) {
       core.info(
         `Removing an approval from ${review.user?.login} (cannot approve this PR since they committed to it)`
       );
-      if (review.body !== '') {
+      core.info(`review.body: ${review.body}`);
+      if (review.body.length > 0) {
         core.info(
           `Moving review comment to a new comment in order to dismiss review.`
         );
