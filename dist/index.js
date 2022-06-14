@@ -375,7 +375,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const github = __importStar(__webpack_require__(469));
 function removeExistingApprovalsIfExist(client, pr) {
-    var _a, _b, _c;
+    var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
         // Get list of all reviews on a PR
         const { data: listReviews } = yield client.rest.pulls.listReviews({
@@ -408,6 +408,7 @@ function removeExistingApprovalsIfExist(client, pr) {
                     message: `${(_c = review.user) === null || _c === void 0 ? void 0 : _c.login} cannot approve this PR since they committed to it`,
                 });
                 core.info(`dismissResponse: ${JSON.stringify(dismissResponse)}`);
+                core.setFailed(`${(_d = review.user) === null || _d === void 0 ? void 0 : _d.login} cannot approve this PR since they committed to it`);
             }
         }
     });

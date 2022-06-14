@@ -39,6 +39,9 @@ async function removeExistingApprovalsIfExist(client: GitHub, pr: any) {
         message: `${review.user?.login} cannot approve this PR since they committed to it`,
       });
       core.info(`dismissResponse: ${JSON.stringify(dismissResponse)}`);
+      core.setFailed(
+        `${review.user?.login} cannot approve this PR since they committed to it`
+      );
     }
   }
 }
