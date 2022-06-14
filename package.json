@@ -21,11 +21,12 @@
     "github",
     "GitHub"
   ],
-  "author": "Jon Peck",
+  "author": "peckjon",
   "contributors": [
     "Cognite AS",
     "hmarr",
-    "James Hu"
+    "James Hu",
+    "some-natalie"
   ],
   "license": "MIT",
   "bugs": {
