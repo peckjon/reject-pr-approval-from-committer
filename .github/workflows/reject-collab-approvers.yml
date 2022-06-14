@@ -1,12 +1,8 @@
 name: Dismiss code reviews from collaborators
 
 on:
-  pull_request_target:
-    branches:
-      - master
-      - main
-      - develop
-
+  pull_request_review:
+    types: [submitted]
 
 jobs:
   approver-vibe-check:
@@ -15,4 +11,6 @@ jobs:
     if: github.event.review.state == 'approved'
     steps:
       - name: Dismiss code reviews from collaborators
-        uses: ./
+        uses: peckjon/reject-pr-approval-from-committer@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
