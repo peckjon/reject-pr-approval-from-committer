@@ -27,7 +27,7 @@ async function removeExistingApprovalsIfExist(client: GitHub, pr: any) {
   for (let review of listReviews) {
     core.info(`review.user.login: ${review.user?.login}`);
     core.info(`commitAuthorLogins: ${commitAuthorLogins}`);
-    if (review.user && review.user.login in commitAuthorLogins) {
+    if (review.user && commitAuthorLogins.includes(review.user.login)) {
       core.info(`Removing an approval from ${review.user?.login}`);
       await client.rest.pulls.dismissReview({
         owner: github.context.repo.owner,

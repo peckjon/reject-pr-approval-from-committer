@@ -398,7 +398,7 @@ function removeExistingApprovalsIfExist(client, pr) {
         for (let review of listReviews) {
             core.info(`review.user.login: ${(_a = review.user) === null || _a === void 0 ? void 0 : _a.login}`);
             core.info(`commitAuthorLogins: ${commitAuthorLogins}`);
-            if (review.user && review.user.login in commitAuthorLogins) {
+            if (review.user && commitAuthorLogins.includes(review.user.login)) {
                 core.info(`Removing an approval from ${(_b = review.user) === null || _b === void 0 ? void 0 : _b.login}`);
                 yield client.rest.pulls.dismissReview({
                     owner: github.context.repo.owner,
