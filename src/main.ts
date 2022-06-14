@@ -25,6 +25,8 @@ async function removeExistingApprovalsIfExist(client: GitHub, pr: any) {
 
   // Remove PR approvals by any committer to the PR
   for (let review of listReviews) {
+    core.debug(`review.user.login: ${review.user?.login}`);
+    core.debug(`commitAuthorLogins: ${commitAuthorLogins}`);
     if (review.user && review.user.login in commitAuthorLogins) {
       core.info(`Removing an approval from ${review.user?.login}`);
       await client.rest.pulls.dismissReview({
