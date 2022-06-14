@@ -32,14 +32,18 @@ async function removeExistingApprovalsIfExist(client: GitHub, pr: any) {
         `Removing an approval from ${review.user?.login} (cannot approve this PR since they committed to it)`
       );
       if (review.body !== '') {
-        core.info(`Moving review comment to a new comment in order to dismiss review.`);
-        const { data: createComment } = await client.rest.pulls.createComment({
+        core.info(
+          `Moving review comment to a new comment in order to dismiss review.`
+        );
+        const { data: submitReview } = await client.rest.pulls.submitReview({
           owner: github.context.repo.owner,
           repo: github.context.repo.repo,
-          issue_number: pr.number,
+          pull_number: pr.number,
           review_id: review.id,
-          body: review.body,
+          body: `Moving review comment by ${review.user?.login} to a new comment in order to dismiss review:\n\nreview.body`,
+          event: 'COMMENT',
         });
+        core.debug(`submitReview: ${JSON.stringify(submitReview)}`);
         const { data: updateReview } = await client.rest.pulls.updateReview({
           owner: github.context.repo.owner,
           repo: github.context.repo.repo,
@@ -47,6 +51,7 @@ async function removeExistingApprovalsIfExist(client: GitHub, pr: any) {
           review_id: review.id,
           body: '',
         });
+        core.debug(`updateReview: ${JSON.stringify(updateReview)}`);
       }
       const dismissResponse = await client.rest.pulls.dismissReview({
         owner: github.context.repo.owner,

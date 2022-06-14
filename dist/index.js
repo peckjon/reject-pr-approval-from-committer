@@ -375,7 +375,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const github = __importStar(__webpack_require__(469));
 function removeExistingApprovalsIfExist(client, pr) {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e;
     return __awaiter(this, void 0, void 0, function* () {
         // Get list of all reviews on a PR
         const { data: listReviews } = yield client.rest.pulls.listReviews({
@@ -400,15 +400,35 @@ function removeExistingApprovalsIfExist(client, pr) {
             core.info(`commitAuthorLogins: ${commitAuthorLogins}`);
             if (review.user && commitAuthorLogins.includes(review.user.login)) {
                 core.info(`Removing an approval from ${(_b = review.user) === null || _b === void 0 ? void 0 : _b.login} (cannot approve this PR since they committed to it)`);
+                if (review.body !== '') {
+                    core.info(`Moving review comment to a new comment in order to dismiss review.`);
+                    const { data: submitReview } = yield client.rest.pulls.submitReview({
+                        owner: github.context.repo.owner,
+                        repo: github.context.repo.repo,
+                        pull_number: pr.number,
+                        review_id: review.id,
+                        body: `Moving review comment by ${(_c = review.user) === null || _c === void 0 ? void 0 : _c.login} to a new comment in order to dismiss review:\n\nreview.body`,
+                        event: 'COMMENT',
+                    });
+                    core.debug(`submitReview: ${JSON.stringify(submitReview)}`);
+                    const { data: updateReview } = yield client.rest.pulls.updateReview({
+                        owner: github.context.repo.owner,
+                        repo: github.context.repo.repo,
+                        pull_number: pr.number,
+                        review_id: review.id,
+                        body: '',
+                    });
+                    core.debug(`updateReview: ${JSON.stringify(updateReview)}`);
+                }
                 const dismissResponse = yield client.rest.pulls.dismissReview({
                     owner: github.context.repo.owner,
                     repo: github.context.repo.repo,
                     pull_number: pr.number,
                     review_id: review.id,
-                    message: `${(_c = review.user) === null || _c === void 0 ? void 0 : _c.login} cannot approve this PR since they committed to it`,
+                    message: `${(_d = review.user) === null || _d === void 0 ? void 0 : _d.login} cannot approve this PR since they committed to it`,
                 });
                 core.debug(`dismissResponse: ${JSON.stringify(dismissResponse)}`);
-                core.setFailed(`${(_d = review.user) === null || _d === void 0 ? void 0 : _d.login} cannot approve this PR since they committed to it`);
+                core.setFailed(`${(_e = review.user) === null || _e === void 0 ? void 0 : _e.login} cannot approve this PR since they committed to it`);
             }
         }
     });
