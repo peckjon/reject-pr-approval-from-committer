@@ -19,7 +19,7 @@ async function removeExistingApprovalsIfExist(client: GitHub, pr: any) {
   });
 
   // List logins of all commit authors on the PR
-  var commitAuthorLogins = listCommits.map(function(commit) {
+  var commitAuthorLogins = listCommits.map(function (commit) {
     return commit.author?.login;
   });
 
@@ -53,7 +53,6 @@ async function run() {
     const client = github.getOctokit(token);
 
     await removeExistingApprovalsIfExist(client, pr);
-
   } catch (error) {
     core.setFailed((error as Error).message);
   }
