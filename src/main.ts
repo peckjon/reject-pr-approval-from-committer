@@ -31,7 +31,7 @@ async function removeExistingApprovalsIfExist(client: GitHub, pr: any) {
       core.info(
         `Removing an approval from ${review.user?.login} (cannot approve this PR since they committed to it)`
       );
-      const { data: dismissResponse } = await client.rest.pulls.dismissReview({
+      const dismissResponse = await client.rest.pulls.dismissReview({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
         pull_number: pr.number,
