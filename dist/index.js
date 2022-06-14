@@ -375,7 +375,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const github = __importStar(__webpack_require__(469));
 function removeExistingApprovalsIfExist(client, pr) {
-    var _a, _b, _c;
+    var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
         // Get list of all reviews on a PR
         const { data: listReviews } = yield client.rest.pulls.listReviews({
@@ -396,16 +396,18 @@ function removeExistingApprovalsIfExist(client, pr) {
         });
         // Remove PR approvals by any committer to the PR
         for (let review of listReviews) {
+            core.debug(`review.user.login: ${(_a = review.user) === null || _a === void 0 ? void 0 : _a.login}`);
+            core.debug(`commitAuthorLogins: ${commitAuthorLogins}`);
             if (review.user && review.user.login in commitAuthorLogins) {
-                core.info(`Removing an approval from ${(_a = review.user) === null || _a === void 0 ? void 0 : _a.login}`);
+                core.info(`Removing an approval from ${(_b = review.user) === null || _b === void 0 ? void 0 : _b.login}`);
                 yield client.rest.pulls.dismissReview({
                     owner: github.context.repo.owner,
                     repo: github.context.repo.repo,
                     pull_number: pr.number,
                     review_id: review.id,
-                    message: `${(_b = review.user) === null || _b === void 0 ? void 0 : _b.login} cannot approve this PR since they committed to it`,
+                    message: `${(_c = review.user) === null || _c === void 0 ? void 0 : _c.login} cannot approve this PR since they committed to it`,
                 });
-                core.info(`Removed approval from ${(_c = review.user) === null || _c === void 0 ? void 0 : _c.login}`);
+                core.info(`Removed approval from ${(_d = review.user) === null || _d === void 0 ? void 0 : _d.login}`);
             }
         }
     });
