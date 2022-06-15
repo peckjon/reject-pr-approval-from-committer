@@ -30,33 +30,37 @@ async function removeExistingApprovalsIfExist(client: GitHub, pr: any) {
     core.info(`review.pull_request_url: ${review.pull_request_url}`);
     core.info(`review.user.login: ${review.user?.login}`);
     core.info(`commitAuthorLogins: ${commitAuthorLogins}`);
-    if (review.user && commitAuthorLogins.includes(review.user.login)) {
+    if (
+      review.state === 'APPROVED' &&
+      review.user &&
+      commitAuthorLogins.includes(review.user.login)
+    ) {
       core.info(
         `Removing an approval from ${review.user?.login} (cannot approve this PR since they committed to it)`
       );
-      core.info(`review.body: ${review.body}`);
-      if (review.body.length > 0) {
-        core.info(
-          `Moving review comment to a new comment in order to dismiss review.`
-        );
-        const { data: submitReview } = await client.rest.pulls.submitReview({
-          owner: github.context.repo.owner,
-          repo: github.context.repo.repo,
-          pull_number: pr.number,
-          review_id: review.id,
-          body: `Moving review comment by ${review.user?.login} to a new comment in order to dismiss review:\n\nreview.body`,
-          event: 'COMMENT',
-        });
-        core.debug(`submitReview: ${JSON.stringify(submitReview)}`);
-        const { data: updateReview } = await client.rest.pulls.updateReview({
-          owner: github.context.repo.owner,
-          repo: github.context.repo.repo,
-          pull_number: pr.number,
-          review_id: review.id,
-          body: '',
-        });
-        core.debug(`updateReview: ${JSON.stringify(updateReview)}`);
-      }
+      // core.info(`review.body: ${review.body}`);
+      // if (review.body.length > 0) {
+      //   core.info(
+      //     `Moving review comment to a new comment in order to dismiss review.`
+      //   );
+      //   const { data: submitReview } = await client.rest.pulls.submitReview({
+      //     owner: github.context.repo.owner,
+      //     repo: github.context.repo.repo,
+      //     pull_number: pr.number,
+      //     review_id: review.id,
+      //     body: `Moving review comment by ${review.user?.login} to a new comment in order to dismiss review:\n\nreview.body`,
+      //     event: 'COMMENT',
+      //   });
+      //   core.debug(`submitReview: ${JSON.stringify(submitReview)}`);
+      //   const { data: updateReview } = await client.rest.pulls.updateReview({
+      //     owner: github.context.repo.owner,
+      //     repo: github.context.repo.repo,
+      //     pull_number: pr.number,
+      //     review_id: review.id,
+      //     body: '',
+      //   });
+      //   core.debug(`updateReview: ${JSON.stringify(updateReview)}`);
+      // }
       const dismissResponse = await client.rest.pulls.dismissReview({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
