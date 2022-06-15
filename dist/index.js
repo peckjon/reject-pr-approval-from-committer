@@ -396,6 +396,9 @@ function removeExistingApprovalsIfExist(client, pr) {
         });
         // Remove PR approvals by any committer to the PR
         for (let review of listReviews) {
+            core.info(`review.id: ${review.id}`);
+            core.info(`review.state: ${review.state}`);
+            core.info(`review.pull_request_url: ${review.pull_request_url}`);
             core.info(`review.user.login: ${(_a = review.user) === null || _a === void 0 ? void 0 : _a.login}`);
             core.info(`commitAuthorLogins: ${commitAuthorLogins}`);
             if (review.user && commitAuthorLogins.includes(review.user.login)) {
