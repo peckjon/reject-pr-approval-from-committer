@@ -1,10 +1,8 @@
 # GitHub Action: do not allow committers on a Pull Request to approve the PR
 
-**Name:** `peckjon/reject-pr-approval-from-committer`
+While GitHub prevents self-approval of PRs, it doesn't prevent a user from approving a PR they worked on. In some scenarios, this could allow for PRs to be approved with no outside review.
 
-(This is a fork of `handy-common-utils/conditionally-approve-pr-from-trusted-committers`)
-
-Do not allow a committer on a GitHub pull request to approve the PR.
+This action prevents any committers on a Pull Request from approvimg the PR. It can be used standalone (e.g. triggered by on all submitted Pull Requests in a repo), or as a Required Status Check.
 
 ## Usage instructions
 
@@ -33,7 +31,3 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
-
-## Why?
-
-While GitHub prevents self-approval of PRs, it doesn't prevent a user from approving a PR they worked on. In some scenarios, this could allow for PRs to be approved with no outside review.
