@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/peckjon/reject-pr-approval-from-committer#readme",
   "dependencies": {
-    "@actions/core": "^1.6.0",
+    "@actions/core": "^1.9.1",
     "@actions/github": "^5.0.1"
   },
   "devDependencies": {
