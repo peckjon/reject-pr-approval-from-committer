@@ -14,7 +14,7 @@ The workflow using this action is supposed to be triggered by `pull_request` or 
 Here's an example workflow file:
 
 ```yaml
-name: Prevent committers from approvaing a PR
+name: Prevent committers from approving a PR
 
 on:
   pull_request_review:
